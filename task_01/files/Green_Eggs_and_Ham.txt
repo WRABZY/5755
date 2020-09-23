@@ -1,0 +1,143 @@
+1.   Green Eggs and Ham
+2.
+3.
+4.   I am Sam
+5.   Sam I am
+6.
+7.   That Sam-I-am! That Sam-I-am!
+8.   I do not like that Sam-I-am!
+9.
+10.  Do you like green eggs and ham?
+11.  I do not like them, Sam-I-am.
+12.  I do not like green eggs and ham.
+13.  Would you like them here or there?
+14.
+15.  I would not like them here or there.
+16.  I would not like them anywhere.
+17.  I do not like green eggs and ham.
+18.  I do not like them, Sam-I-am.
+19.
+20.  Would you like them in a house?
+21.  Would you like them with a mouse?
+22.
+23.  I do not like them in a house.
+24.  I do not like them with a mouse.
+25.  I do not like them here or there.
+26.  I do not like them anywhere.
+27.  I do not like green eggs and ham.
+28.  I do not like them, Sam-I-am.
+29.
+30.  Would you eat them in a box?
+31.  Would you eat them with a fox?
+32.
+33.  Not in a box.
+34.  Not with a fox.
+35.  Not in a house.
+36.  Not with a mouse.
+37.  I would not like them here or there.
+38.  I would not like them anywhere.
+39.  I would not eat green eggs and ham.
+40.  I do not like them, Sam-I-am.
+41.
+42.  Would you? Could you?
+43.  In a car?
+44.  Eat them! Eat them!
+45.  Here they are.
+46. 
+47.  I would not,
+48.  Could not,
+49.  In a car.
+50.
+51.  You  may like them.
+52.  You will see.
+53.  You may like them
+54.  In a tree!
+55.
+56.  I would not, could not in a tree.
+57.  Not in a car! You let me be.
+58.  I do not like them in a box.
+59.  I do not like them with a fox.
+60.  I do not like them in a house.
+61.  I do not like them with a mouse.
+62.  I do not like them here or there.
+63.  I do not like them anywhere.
+64.  I do not like green eggs and ham.
+65.  I do not like them, Sam-I-am.
+66.
+67.  A train! A train!
+68.  A train! A train!
+69.  Could you, would you
+70.  On a train?
+71.
+72.  Not on a train! Not in a tree!
+73.  Not in a car! Sam! Let me be!
+74.
+75.  I would not, could not, in a box.
+76.  I could not, would not, with a fox.
+77.  I will not eat them with a mouse.
+78.  I will not eat them in a house.
+79.  I will not eat them here or there.
+80.  I will not eat them anywhere.
+81.  I do not like green eggs and ham.
+82.  I do not like them, Sam-I-am.
+83.
+84.  Say!
+85.  In the dark?
+86.  Here in the dark!
+87.  Would you, could you, in the dark?
+88.  I would not, could not, in the dark.
+89.  Would you, could you, in the rain?
+90.
+91.  I would not, could not, in the rain.
+92.  Not in the dark. Not on a train.
+93.  Not in a car. Not in a tree.
+94.  I do not like them, Sam, you see.
+95.  Not in a house. Not in a box.
+96.  Not with a mouse. Not with a fox.
+97.  I will not eat them here or there.
+98.  I do not like them anywhere!
+99.  You do not like green eggs and ham?
+100. I do not like them, Sam-I-am.
+101. Could you, would you, with a goat?
+102. I would not, could not, with a goat!
+103. Would you, could you on a boat?
+104.
+105. I could not, would not, on a boat.
+106. I will not, will not, with a goat.
+107. I will not eat them in the rain.
+108. I will not eat them on a train.
+109. Not in the dark! Not in a tree!
+110. Not in a car! You let me be!
+111. I do not like them in a box.
+112. I do not like them with a fox.
+113. I will not eat them in a house.
+114. I do not like them with a mouse.
+115. I do not like them here or there.
+116. I do not like them ANYWHERE!
+117. I do not like green eggs and ham!
+118. I do not like them, Sam-I –am.
+119.
+120. You do not like them. So you say.
+121. Try them! Try them! And you may.
+122. Try them and you may, I say.
+123.
+124. Sam! If you will let me be,
+125. I will try them. You will see.
+126.
+127. Say! I like green eggs and ham!
+128. I do! I like them, Sam-I-am!
+129. And I will eat them in a boat.
+130. And I will eat them with a goat…
+131. And I will eat them in the rain.
+132. And in the dark. And on a train.
+133. And in a car. And in a tree.
+134. They are so good, so good, you see!
+135. So I will eat them in a box.
+136. And I will eat them with a fox.
+137. And I will eat them in a house.
+138. And I will eat them with a mouse.
+139. And I will eat them here and there.
+140. Say! I will eat them ANYWHERE!
+141.
+142. I do so like green eggs and ham!
+143. Thank you! Thank you, Sam-I-am!
