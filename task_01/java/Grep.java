@@ -5,6 +5,7 @@ import java.time.Duration;
 
 import javax.naming.OperationNotSupportedException;
 import java.nio.file.Files;
+import java.nio.charset.StandardCharsets;
 import java.util.stream.Stream;
 import java.util.stream.Collectors;
 import java.io.IOException;
@@ -15,6 +16,8 @@ import java.util.logging.Level;
 import java.util.logging.Handler;
 import java.util.logging.ConsoleHandler;
 import java.util.logging.FileHandler;
+import java.util.List;
+import java.util.Arrays;
 
 /**
   * Class {@code Grep} encapsulates methods for line-by-line filtering
@@ -25,8 +28,9 @@ import java.util.logging.FileHandler;
 */
 public class Grep {
 	
-	// Logging
-	private static final Logger logger = Logger.getLogger("xyz.wrabzy.Grep");
+	// For logging
+	private static final String className = "xyz.wrabzy.learning.Grep";
+	private static final Logger logger = Logger.getLogger(className);
 	private static       Handler handler; 
 	static {
 		try {
@@ -41,11 +45,9 @@ public class Grep {
 		logger.addHandler(handler);
 	}
 	
-	private static final String className = "xyz.wrabzy.Grep";
-	
 	
 	// The core of this class
-	private Stream<String> lines;
+	private List<String> lines;
 	
 	
 	//Constructors
@@ -54,14 +56,14 @@ public class Grep {
 		logger.log(Level.FINE, "Empty Grep-object created.");
 	}
 	
-	public Grep(Stream<String> lines) {
+	public Grep(List<String> lines) {
 		this.lines = lines;
-		logger.log(Level.FINE, "Grep-object created with Stream<String>.");
+		logger.log(Level.FINE, "Grep-object created with List<String>.");
 	}
 	
 	
-	// Set/get
-	public void setText(Stream<String> lines) throws OperationNotSupportedException {
+	// Setter & getter
+	public void setText(List<String> lines) throws OperationNotSupportedException {
 		if (this.lines == null){
 			logger.log(Level.FINE, "Successfull setting text in Grep-object.");
 			this.lines = lines;
@@ -73,41 +75,71 @@ public class Grep {
 		}
 	}
 	
-	public String getText() {
-		return lines.collect(Collectors.joining("\n"));
+	public List<String> getText() {
+		logger.entering(className, "getText");
+		
+		if (lines != null) {
+			logger.exiting(className, "getText", lines);
+			return lines;
+		}
+		else {
+			throw new NullPointerException("Grep-object is empty. (List of strings not specified.)");
+		}
 	}
 	
 	
 	// Work methods
 	
 	
-	public String word(String w) {
-		logger.entering("xyz.wrabzy.Grep", "word", w);
+	public List<String> word(String w) {
+		logger.entering(className, "word", w);
 		
-		String answer = lines.filter(l -> l.contains(w)).collect(Collectors.joining("\n"));
+		if (lines != null) {
+			List<String> answer = lines.stream()
+									   .filter(l -> {
+										   String[] strings = l.toLowerCase().split("\\W+");
+										   Arrays.sort(strings);
+										   return Arrays.binarySearch(strings, w.toLowerCase()) >= 0;
+									   })
+									   .collect(Collectors.toList());
 		
-		logger.exiting("xyz.wrabzy.Grep", "word", answer);
+			logger.exiting(className, "word", answer);
 		
-		return answer;
+			return answer;
+		}
+		else {
+			throw new NullPointerException("Grep-object is empty. (List of strings not specified.)");
+		}
 	}
 	
 	
-	public String wordcs(String w) {
+	public List<String> wordcs(String w) {
 		logger.entering("xyz.wrabzy.Grep", "wordcs", w);
 		
-		String answer = lines.filter(l -> l.contains(w)).collect(Collectors.joining("\n"));
+		if (lines != null) {
+			List<String> answer = lines.stream()
+									   .filter(l -> {
+										   String[] strings = l.split("\\W+");
+										   Arrays.sort(strings);
+										   return Arrays.binarySearch(strings, w) >= 0;
+									   })
+									   .collect(Collectors.toList());
 		
-		logger.exiting("xyz.wrabzy.Grep", "wordcs", answer);
+			logger.exiting("xyz.wrabzy.Grep", "wordcs", answer);
 		
-		return answer;
+			return answer;
+		}
+		else {
+			throw new NullPointerException("Grep-object is empty. (List of strings not specified.)");
+		}
 	}
 	
 	
 	// Testing
 	public static void main(String[] args) throws OperationNotSupportedException, IOException {
-		logger.entering("xyz.wrabzy.Grep", "main", args);
+		logger.entering(className, "main", args);
 		
-		Logger testLogger = Logger.getLogger("xyz.wrabzy.GrepTest");
+		Logger testLogger = Logger.getLogger(className + "Test");
 		testLogger.setLevel(Level.ALL);
 		testLogger.setUseParentHandlers(false);
 		testLogger.addHandler(handler);
@@ -120,18 +152,48 @@ public class Grep {
 		
 		Path firstPath = Paths.get("..", "files", "Green_Eggs_and_Ham.txt");
 		
-		try (Stream<String> firstStream = Files.lines(firstPath)) {
-			Grep firstTest = new Grep();
-			firstTest.setText(firstStream);
-			try {
-				firstTest.setText(Stream.of("testLine1", "testLine2", "testLine3"));
-			} catch (OperationNotSupportedException onse) {
-				testLogger.log(testLogLevel, "Rewriting test successfully comleted.", onse);
-			}
-			
-			boolean mouseSearching = firstTest.word("mouse").split("\n").length == 8;
-			testLogger.logp(testLogLevel, className, "main", "Testing case-sensitive filtering by word \"mouse\": " + mouseSearching);
+		List<String> firstStringList = Files.readAllLines(firstPath, StandardCharsets.UTF_8);
+		
+		// Test of creating empty Grep-object
+		Grep firstTest = new Grep();
+		
+		// Test of text setting in empty Grep-object
+		firstTest.setText(firstStringList);
+		
+		// Test of text rewriting in Grep-object
+		try {
+			firstTest.setText(Arrays.asList("testLine1", "testLine2", "testLine3"));
+		} catch (OperationNotSupportedException onse) {
+			testLogger.log(testLogLevel, "Rewriting test successfully comleted.", onse);
 		}
+		
+		// Test of filtering by one one-letter word case-insensitive
+		String letterCaseInsensitive = "a";
+		int mustFind = 52;
+		boolean letterCaseInsensitiveSearching = firstTest.word(letterCaseInsensitive).size() == mustFind;
+		testLogger.logp(testLogLevel, 
+						className, 
+						"main", 
+						"Testing case-insensitive filtering by one-letter word \"" + letterCaseInsensitive + "\": " + letterCaseInsensitiveSearching);
+		
+		// Test of filtering by one word case-insensitive
+		String wordCaseInsensitive = "anyWhere";
+		mustFind = 8;
+		boolean wordCaseInsensitiveSearching = firstTest.word(wordCaseInsensitive).size() == mustFind;
+		testLogger.logp(testLogLevel, 
+						className, 
+						"main", 
+						"Testing case-insensitive filtering by word \"" + wordCaseInsensitive + "\": " + wordCaseInsensitiveSearching);
+		
+		// Test of filtering by one word case-sensitive
+		String wordCaseSensitive = "ANYWHERE";
+		mustFind = 2;
+		boolean wordCaseSensitiveSearching = firstTest.wordcs(wordCaseSensitive).size() == mustFind;
+		testLogger.logp(testLogLevel, 
+						className, 
+						"main", 
+						"Testing case-sensitive filtering by word \"" + wordCaseSensitive + "\": " + wordCaseSensitiveSearching);
+		
 		
 		Instant firstEnd = Instant.now();
 		Duration firstTimeElapsed = Duration.between(firstStart,firstEnd);
