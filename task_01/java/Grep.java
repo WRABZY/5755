@@ -50,7 +50,7 @@ public class Grep {
 	private List<String> lines;
 	
 	
-	//Constructors
+	// Constructors
 	public Grep() {
 		this.lines = null;
 		logger.log(Level.FINE, "Empty Grep-object created.");
@@ -97,9 +97,9 @@ public class Grep {
 		if (lines != null) {
 			List<String> answer = lines.stream()
 									   .filter(l -> {
-										   String[] strings = l.toLowerCase().split("\\W+");
-										   Arrays.sort(strings);
-										   return Arrays.binarySearch(strings, w.toLowerCase()) >= 0;
+										   String[] words = l.toLowerCase().split("\\W+");
+										   Arrays.sort(words);
+										   return Arrays.binarySearch(words, w.toLowerCase()) >= 0;
 									   })
 									   .collect(Collectors.toList());
 		
@@ -119,9 +119,9 @@ public class Grep {
 		if (lines != null) {
 			List<String> answer = lines.stream()
 									   .filter(l -> {
-										   String[] strings = l.split("\\W+");
-										   Arrays.sort(strings);
-										   return Arrays.binarySearch(strings, w) >= 0;
+										   String[] words = l.split("\\W+");
+										   Arrays.sort(words);
+										   return Arrays.binarySearch(words, w) >= 0;
 									   })
 									   .collect(Collectors.toList());
 		
@@ -134,6 +134,101 @@ public class Grep {
 		}
 	}
 	
+	
+	public List<String> wwand(String... w) {
+		logger.entering("xyz.wrabzy.Grep", "wwand", w);
+		
+		if (lines != null) {
+			List<String> answer = lines.stream()
+									   .filter(l -> {
+										   String[] words = l.toLowerCase().split("\\W+");
+										   Arrays.sort(words);
+										   boolean containWord = true;
+										   for (String word: w) containWord = containWord && (Arrays.binarySearch(words, word.toLowerCase()) >= 0);
+										   return containWord;
+									   })
+									   .collect(Collectors.toList());
+		
+			logger.exiting("xyz.wrabzy.Grep", "wwand", answer);
+		
+			return answer;
+		}
+		else {
+			throw new NullPointerException("Grep-object is empty. (List of strings not specified.)");
+		}
+	}
+	
+	
+	public List<String> wwandcs(String... w) {
+		logger.entering("xyz.wrabzy.Grep", "wwandcs", w);
+		
+		if (lines != null) {
+			List<String> answer = lines.stream()
+									   .filter(l -> {
+										   String[] words = l.split("\\W+");
+										   Arrays.sort(words);
+										   boolean containWord = true;
+										   for (String word: w) containWord = containWord && (Arrays.binarySearch(words, word) >= 0);
+										   return containWord;
+									   })
+									   .collect(Collectors.toList());
+		
+			logger.exiting("xyz.wrabzy.Grep", "wwandcs", answer);
+		
+			return answer;
+		}
+		else {
+			throw new NullPointerException("Grep-object is empty. (List of strings not specified.)");
+		}
+	}
+	
+	
+	public List<String> wwor(String... w) {
+		logger.entering("xyz.wrabzy.Grep", "wwor", w);
+		
+		if (lines != null) {
+			List<String> answer = lines.stream()
+									   .filter(l -> {
+										   String[] words = l.toLowerCase().split("\\W+");
+										   Arrays.sort(words);
+										   boolean containWord = false;
+										   for (String word: w) containWord = containWord || (Arrays.binarySearch(words, word.toLowerCase()) >= 0);
+										   return containWord;
+									   })
+									   .collect(Collectors.toList());
+		
+			logger.exiting("xyz.wrabzy.Grep", "wwor", answer);
+		
+			return answer;
+		}
+		else {
+			throw new NullPointerException("Grep-object is empty. (List of strings not specified.)");
+		}
+	}
+	
+	
+	public List<String> wworcs(String... w) {
+		logger.entering("xyz.wrabzy.Grep", "wworcs", w);
+		
+		if (lines != null) {
+			List<String> answer = lines.stream()
+									   .filter(l -> {
+										   String[] words = l.split("\\W+");
+										   Arrays.sort(words);
+										   boolean containWord = false;
+										   for (String word: w) containWord = containWord || (Arrays.binarySearch(words, word) >= 0);
+										   return containWord;
+									   })
+									   .collect(Collectors.toList());
+		
+			logger.exiting("xyz.wrabzy.Grep", "wworcs", answer);
+		
+			return answer;
+		}
+		else {
+			throw new NullPointerException("Grep-object is empty. (List of strings not specified.)");
+		}
+	}
 	
 	// Testing
 	public static void main(String[] args) throws OperationNotSupportedException, IOException {
@@ -194,7 +289,42 @@ public class Grep {
 						"main", 
 						"Testing case-sensitive filtering by word \"" + wordCaseSensitive + "\": " + wordCaseSensitiveSearching);
 		
+		// Test of filtering by few words each of which included in line case-insensitive
+		String[] wordsCaseInsensitive = {"say", "HAM"};
+		mustFind = 1;
+		boolean wordsCaseInsensitiveSearching = firstTest.wwand(wordsCaseInsensitive).size() == mustFind;
+		testLogger.logp(testLogLevel, 
+						className, 
+						"main", 
+						"Testing case-insensitive filtering by few words \"" + Arrays.toString(wordsCaseInsensitive)  + "\"" + " using \"AND\": " + wordsCaseInsensitiveSearching);
 		
+		// Test of filtering by few words each of which included in line case-sensitive
+		String[] wordsCaseSensitive = {"A", "train"};
+		mustFind = 2;
+		boolean wordsCaseSensitiveSearching = firstTest.wwandcs(wordsCaseSensitive).size() == mustFind;
+		testLogger.logp(testLogLevel, 
+						className, 
+						"main", 
+						"Testing case-sensitive filtering by few words \"" + Arrays.toString(wordsCaseSensitive)  + "\"" + " using \"AND\": " + wordsCaseSensitiveSearching);
+		
+		// Test of filtering by few words at least one of which included in line case-insensitive
+		String[] wordsOrCaseInsensitive = {"orange", "could", "BOX"};
+		mustFind = 20;
+		boolean wordsOrCaseInsensitiveSearching = firstTest.wwor(wordsOrCaseInsensitive).size() == mustFind;
+		testLogger.logp(testLogLevel, 
+						className, 
+						"main", 
+						"Testing case-insensitive filtering by few words \"" + Arrays.toString(wordsOrCaseInsensitive)  + "\"" + " using \"OR\": " + wordsOrCaseInsensitiveSearching);
+		
+		// Test of filtering by few words at least one of which included in line case-sensitive
+		String[] wordsOrCaseSensitive = {"orange", "could", "BOX"};
+		mustFind = 10;
+		boolean wordsOrCaseSensitiveSearching = firstTest.wworcs(wordsOrCaseSensitive).size() == mustFind;
+		testLogger.logp(testLogLevel, 
+						className, 
+						"main", 
+						"Testing case-sensitive filtering by few words \"" + Arrays.toString(wordsOrCaseSensitive)  + "\"" + " using \"OR\": " + wordsOrCaseSensitiveSearching);
+										
 		Instant firstEnd = Instant.now();
 		Duration firstTimeElapsed = Duration.between(firstStart,firstEnd);
 		long firstMillis = firstTimeElapsed.toMillis();
