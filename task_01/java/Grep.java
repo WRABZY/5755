@@ -1,26 +1,16 @@
-// default package to simplify manual testing during development
+// default package is using to simplify directory structure
+// it is assumed that package is "xyz.wrabzy.learning" (full classname is "xyz.wrabzy.learning.Grep")
 
-import java.time.Instant;
-import java.time.Duration;
+import java.util.List;			// Not used in the class, imported for testing
+import java.util.ArrayList;		// Not used in the class, imported for testing	
 
-import javax.naming.OperationNotSupportedException;
-import java.nio.file.Files;
-import java.nio.charset.StandardCharsets;
 import java.util.stream.Stream;
-import java.util.stream.Collectors;
-import java.io.IOException;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.util.logging.Logger;
-import java.util.logging.Level;
-import java.util.logging.Handler;
-import java.util.logging.ConsoleHandler;
-import java.util.logging.FileHandler;
-import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.Arrays;
 
 /**
-  * Class {@code Grep} encapsulates methods for line-by-line filtering
+  * Class {@code Grep} encapsulates static methods for line-by-line filtering
   * of the input stream of text information by a given word or some words 
   *	case-sensitive or case-insensitive or by regular expression.
   * @author WRABZY
@@ -28,313 +18,122 @@ import java.util.Arrays;
 */
 public class Grep {
 	
-	// For logging
-	private static final String className = "xyz.wrabzy.learning.Grep";
-	private static final Logger logger = Logger.getLogger(className);
-	private static       Handler handler; 
-	static {
-		try {
-			handler = new FileHandler("%h/wrbjgrep_%g_%u.log", 50000, 3, true);
-		}
-		catch (IOException ioe) {
-			handler = new ConsoleHandler();
-		}
-		logger.setUseParentHandlers(false);
-		logger.setLevel(Level.ALL);
-		handler.setLevel(Level.ALL);
-		logger.addHandler(handler);
+	/**
+	  * Filters the text-stream
+	  * depending on the presence of the given word in it
+	  * case-sensitive or case-insensitive
+	  * @param source - text-stream for filtering. It is assumed that text divided by lines.
+	  * @param caseSensitive - flag of case-sensitivity. True - filtering will be case-sensitive.
+	  * @param word - if line contains this word, she will be included in result text-stream.
+	  * @return A stream of lines from source text-stream that contain given word. 
+	*/
+	public static Stream<String> byWord(Stream<String> source, boolean caseSensitive, String word) {
+		return caseSensitive ? 
+			   source.filter(line -> {
+						String[] wordsOfLine = line.split("\\W+");
+						Arrays.sort(wordsOfLine);
+						return Arrays.binarySearch(wordsOfLine, word) >= 0;
+					  }) :
+			   source.filter(line -> {
+					    String[] wordsOfLine = line.toLowerCase().split("\\W+");
+					    Arrays.sort(wordsOfLine);
+					    return Arrays.binarySearch(wordsOfLine, word.toLowerCase()) >= 0;
+					  });
+	}
+	
+	/**
+	  * Filters the text-stream
+	  * depending on the presence all of given words in it
+	  * case-sensitive or case-insensitive
+	  * @param source - text-stream for filtering. It is assumed that text divided by lines.
+	  * @param caseSensitive - flag of case-sensitivity. True - filtering will be case-sensitive.
+	  * @param words - if line contains all of this words, she will be included in result text-stream.
+	  * @return A stream of lines from source text-stream that contain all of given words. 
+	*/
+	public static Stream<String> allWords(Stream<String> source, boolean caseSensitive, String... words) {
+		return caseSensitive ?
+			   source.filter(line -> {
+					    String[] wordsOfLine = line.split("\\W+");
+					    Arrays.sort(wordsOfLine);
+					    boolean containWord = true;
+					    for (String word: words) containWord = containWord && ((Arrays.binarySearch(wordsOfLine, word)) >= 0);
+					    return containWord;
+					  }) :
+			   source.filter(line -> {
+					    String[] wordsOfLine = line.toLowerCase().split("\\W+");
+					    Arrays.sort(wordsOfLine);
+					    boolean containWord = true;
+					    for (String word: words) containWord = containWord && (Arrays.binarySearch(wordsOfLine, word.toLowerCase()) >= 0);
+					    return containWord;
+					  });
+	}
+	
+	/**
+	  * Filters the text-stream
+	  * depending on the presence at least one of given words in it
+	  * case-sensitive or case-insensitive
+	  * @param source - text-stream for filtering. It is assumed that text divided by lines.
+	  * @param caseSensitive - flag of case-sensitivity. True - filtering will be case-sensitive.
+	  * @param words - if line contains at least one of this words, she will be included in result text-stream.
+	  * @return A stream of lines from source text-stream that contain at least one of given words. 
+	*/
+	public static Stream<String> someWords(Stream<String> source, boolean caseSensitive, String... words) {
+		return caseSensitive ?
+			   source.filter(line -> {
+					    String[] wordsOfLine = line.split("\\W+");
+					    Arrays.sort(wordsOfLine);
+					    boolean containWord = false;
+					    for (String word: words) containWord = containWord || (Arrays.binarySearch(wordsOfLine, word) >= 0);
+					    return containWord;
+				      }) :
+			   source.filter(line -> {
+					    String[] wordsOfLine = line.toLowerCase().split("\\W+");
+					    Arrays.sort(wordsOfLine);
+					    boolean containWord = false;
+					    for (String word: words) containWord = containWord || (Arrays.binarySearch(wordsOfLine, word.toLowerCase()) >= 0);
+					    return containWord;
+				      });
+	}
+	
+	/**
+	  * Filters the text-stream
+	  * depending on match given pattern
+	  * @param source - text-stream for filtering. It is assumed that text divided by lines.
+	  * @param pattern - regular expression, @see java.util.regex.Pattern.
+	  * @return A stream of lines from source text-stream in which there was founded a match with the given pattern. 
+	*/
+	public static Stream<String> regex (Stream<String> source, String pattern) {
+		return source.filter(line -> Pattern.compile(pattern).matcher(line).find());
 	}
 	
 	
-	// The core of this class
-	private List<String> lines;
-	
-	
-	// Constructors
-	public Grep() {
-		this.lines = null;
-		logger.log(Level.FINE, "Empty Grep-object created.");
-	}
-	
-	public Grep(List<String> lines) {
-		this.lines = lines;
-		logger.log(Level.FINE, "Grep-object created with List<String>.");
-	}
-	
-	
-	// Setter & getter
-	public void setText(List<String> lines) throws OperationNotSupportedException {
-		if (this.lines == null){
-			logger.log(Level.FINE, "Successfull setting text in Grep-object.");
-			this.lines = lines;
-		} 
-		else {
-			OperationNotSupportedException onse = new OperationNotSupportedException("Overwrite prohibited!");
-			logger.throwing(className, "setText", onse);
-			throw onse;
-		}
-	}
-	
-	public List<String> getText() {
-		logger.entering(className, "getText");
+	// Simple testing
+	public static void main(String[] args) {
+		List<String> testString = new ArrayList<>();
+		testString.add("One   DARK and LIGHT RED    Ubahobo"); 
+		testString.add("Two   dark AND light ORANGE ubahobo");
+		testString.add("Three dark and light YELLOW UBAHOBO");
+		testString.add("Four  DARK AND LIGHT GREEN  Ubahobo");
+		testString.add("Five  DARK and light CYAN   ubahobo");
+		testString.add("Six   dark AND light BLUE   UBAHOBO");
+		testString.add("Seven dark and LIGHT VIOLET Ubahobo");
+							
+		// Testing byWord()					
+	    assert byWord(testString.stream(), true,  "AND") .count() == 3 : "1 - One word case-sensitive.";
+		assert byWord(testString.stream(), false, "AND") .count() == 7 : "2 - One word case-insensitive.";
 		
-		if (lines != null) {
-			logger.exiting(className, "getText", lines);
-			return lines;
-		}
-		else {
-			throw new NullPointerException("Grep-object is empty. (List of strings not specified.)");
-		}
-	}
-	
-	
-	// Work methods
-	
-	
-	public List<String> word(String w) {
-		logger.entering(className, "word", w);
+		// Testing allWords()					
+	    assert allWords(testString.stream(), true,  "DARK", "LIGHT",  "Ubahobo").count() == 2 : "1 - All words case-sensitive.";
+		assert allWords(testString.stream(), false, "DARK", "LIGHT",  "Ubahobo").count() == 7 : "2 - All words case-insensitive.";
 		
-		if (lines != null) {
-			List<String> answer = lines.stream()
-									   .filter(l -> {
-										   String[] words = l.toLowerCase().split("\\W+");
-										   Arrays.sort(words);
-										   return Arrays.binarySearch(words, w.toLowerCase()) >= 0;
-									   })
-									   .collect(Collectors.toList());
+		// Testing someWords()					
+	    assert someWords(testString.stream(), true,  "five", "green",   "VIOLET").count() == 1 : "1 - Some words case-sensitive.";
+		assert someWords(testString.stream(), false, "five", "green",   "VIOLET").count() == 3 : "2 - Some words case-insensitive.";
 		
-			logger.exiting(className, "word", answer);
-		
-			return answer;
-		}
-		else {
-			throw new NullPointerException("Grep-object is empty. (List of strings not specified.)");
-		}
-	}
-	
-	
-	public List<String> wordcs(String w) {
-		logger.entering("xyz.wrabzy.Grep", "wordcs", w);
-		
-		if (lines != null) {
-			List<String> answer = lines.stream()
-									   .filter(l -> {
-										   String[] words = l.split("\\W+");
-										   Arrays.sort(words);
-										   return Arrays.binarySearch(words, w) >= 0;
-									   })
-									   .collect(Collectors.toList());
-		
-			logger.exiting("xyz.wrabzy.Grep", "wordcs", answer);
-		
-			return answer;
-		}
-		else {
-			throw new NullPointerException("Grep-object is empty. (List of strings not specified.)");
-		}
-	}
-	
-	
-	public List<String> wwand(String... w) {
-		logger.entering("xyz.wrabzy.Grep", "wwand", w);
-		
-		if (lines != null) {
-			List<String> answer = lines.stream()
-									   .filter(l -> {
-										   String[] words = l.toLowerCase().split("\\W+");
-										   Arrays.sort(words);
-										   boolean containWord = true;
-										   for (String word: w) containWord = containWord && (Arrays.binarySearch(words, word.toLowerCase()) >= 0);
-										   return containWord;
-									   })
-									   .collect(Collectors.toList());
-		
-			logger.exiting("xyz.wrabzy.Grep", "wwand", answer);
-		
-			return answer;
-		}
-		else {
-			throw new NullPointerException("Grep-object is empty. (List of strings not specified.)");
-		}
-	}
-	
-	
-	public List<String> wwandcs(String... w) {
-		logger.entering("xyz.wrabzy.Grep", "wwandcs", w);
-		
-		if (lines != null) {
-			List<String> answer = lines.stream()
-									   .filter(l -> {
-										   String[] words = l.split("\\W+");
-										   Arrays.sort(words);
-										   boolean containWord = true;
-										   for (String word: w) containWord = containWord && (Arrays.binarySearch(words, word) >= 0);
-										   return containWord;
-									   })
-									   .collect(Collectors.toList());
-		
-			logger.exiting("xyz.wrabzy.Grep", "wwandcs", answer);
-		
-			return answer;
-		}
-		else {
-			throw new NullPointerException("Grep-object is empty. (List of strings not specified.)");
-		}
-	}
-	
-	
-	public List<String> wwor(String... w) {
-		logger.entering("xyz.wrabzy.Grep", "wwor", w);
-		
-		if (lines != null) {
-			List<String> answer = lines.stream()
-									   .filter(l -> {
-										   String[] words = l.toLowerCase().split("\\W+");
-										   Arrays.sort(words);
-										   boolean containWord = false;
-										   for (String word: w) containWord = containWord || (Arrays.binarySearch(words, word.toLowerCase()) >= 0);
-										   return containWord;
-									   })
-									   .collect(Collectors.toList());
-		
-			logger.exiting("xyz.wrabzy.Grep", "wwor", answer);
-		
-			return answer;
-		}
-		else {
-			throw new NullPointerException("Grep-object is empty. (List of strings not specified.)");
-		}
-	}
-	
-	
-	public List<String> wworcs(String... w) {
-		logger.entering("xyz.wrabzy.Grep", "wworcs", w);
-		
-		if (lines != null) {
-			List<String> answer = lines.stream()
-									   .filter(l -> {
-										   String[] words = l.split("\\W+");
-										   Arrays.sort(words);
-										   boolean containWord = false;
-										   for (String word: w) containWord = containWord || (Arrays.binarySearch(words, word) >= 0);
-										   return containWord;
-									   })
-									   .collect(Collectors.toList());
-		
-			logger.exiting("xyz.wrabzy.Grep", "wworcs", answer);
-		
-			return answer;
-		}
-		else {
-			throw new NullPointerException("Grep-object is empty. (List of strings not specified.)");
-		}
-	}
-	
-	// Testing
-	public static void main(String[] args) throws OperationNotSupportedException, IOException {
-		logger.entering(className, "main", args);
-		
-		Logger testLogger = Logger.getLogger(className + "Test");
-		testLogger.setLevel(Level.ALL);
-		testLogger.setUseParentHandlers(false);
-		testLogger.addHandler(handler);
-		Level testLogLevel = Level.FINE;
-		
-		// First set of tests
-		testLogger.logp(testLogLevel, className, "main", "First set of tests.");
-		
-		Instant firstStart = Instant.now();
-		
-		Path firstPath = Paths.get("..", "files", "Green_Eggs_and_Ham.txt");
-		
-		List<String> firstStringList = Files.readAllLines(firstPath, StandardCharsets.UTF_8);
-		
-		// Test of creating empty Grep-object
-		Grep firstTest = new Grep();
-		
-		// Test of text setting in empty Grep-object
-		firstTest.setText(firstStringList);
-		
-		// Test of text rewriting in Grep-object
-		try {
-			firstTest.setText(Arrays.asList("testLine1", "testLine2", "testLine3"));
-		} catch (OperationNotSupportedException onse) {
-			testLogger.log(testLogLevel, "Rewriting test successfully comleted.", onse);
-		}
-		
-		// Test of filtering by one one-letter word case-insensitive
-		String letterCaseInsensitive = "a";
-		int mustFind = 52;
-		boolean letterCaseInsensitiveSearching = firstTest.word(letterCaseInsensitive).size() == mustFind;
-		testLogger.logp(testLogLevel, 
-						className, 
-						"main", 
-						"Testing case-insensitive filtering by one-letter word \"" + letterCaseInsensitive + "\": " + letterCaseInsensitiveSearching);
-		
-		// Test of filtering by one word case-insensitive
-		String wordCaseInsensitive = "anyWhere";
-		mustFind = 8;
-		boolean wordCaseInsensitiveSearching = firstTest.word(wordCaseInsensitive).size() == mustFind;
-		testLogger.logp(testLogLevel, 
-						className, 
-						"main", 
-						"Testing case-insensitive filtering by word \"" + wordCaseInsensitive + "\": " + wordCaseInsensitiveSearching);
-		
-		// Test of filtering by one word case-sensitive
-		String wordCaseSensitive = "ANYWHERE";
-		mustFind = 2;
-		boolean wordCaseSensitiveSearching = firstTest.wordcs(wordCaseSensitive).size() == mustFind;
-		testLogger.logp(testLogLevel, 
-						className, 
-						"main", 
-						"Testing case-sensitive filtering by word \"" + wordCaseSensitive + "\": " + wordCaseSensitiveSearching);
-		
-		// Test of filtering by few words each of which included in line case-insensitive
-		String[] wordsCaseInsensitive = {"say", "HAM"};
-		mustFind = 1;
-		boolean wordsCaseInsensitiveSearching = firstTest.wwand(wordsCaseInsensitive).size() == mustFind;
-		testLogger.logp(testLogLevel, 
-						className, 
-						"main", 
-						"Testing case-insensitive filtering by few words \"" + Arrays.toString(wordsCaseInsensitive)  + "\"" + " using \"AND\": " + wordsCaseInsensitiveSearching);
-		
-		// Test of filtering by few words each of which included in line case-sensitive
-		String[] wordsCaseSensitive = {"A", "train"};
-		mustFind = 2;
-		boolean wordsCaseSensitiveSearching = firstTest.wwandcs(wordsCaseSensitive).size() == mustFind;
-		testLogger.logp(testLogLevel, 
-						className, 
-						"main", 
-						"Testing case-sensitive filtering by few words \"" + Arrays.toString(wordsCaseSensitive)  + "\"" + " using \"AND\": " + wordsCaseSensitiveSearching);
-		
-		// Test of filtering by few words at least one of which included in line case-insensitive
-		String[] wordsOrCaseInsensitive = {"orange", "could", "BOX"};
-		mustFind = 20;
-		boolean wordsOrCaseInsensitiveSearching = firstTest.wwor(wordsOrCaseInsensitive).size() == mustFind;
-		testLogger.logp(testLogLevel, 
-						className, 
-						"main", 
-						"Testing case-insensitive filtering by few words \"" + Arrays.toString(wordsOrCaseInsensitive)  + "\"" + " using \"OR\": " + wordsOrCaseInsensitiveSearching);
-		
-		// Test of filtering by few words at least one of which included in line case-sensitive
-		String[] wordsOrCaseSensitive = {"orange", "could", "BOX"};
-		mustFind = 10;
-		boolean wordsOrCaseSensitiveSearching = firstTest.wworcs(wordsOrCaseSensitive).size() == mustFind;
-		testLogger.logp(testLogLevel, 
-						className, 
-						"main", 
-						"Testing case-sensitive filtering by few words \"" + Arrays.toString(wordsOrCaseSensitive)  + "\"" + " using \"OR\": " + wordsOrCaseSensitiveSearching);
-										
-		Instant firstEnd = Instant.now();
-		Duration firstTimeElapsed = Duration.between(firstStart,firstEnd);
-		long firstMillis = firstTimeElapsed.toMillis();
-		long firstSeconds = firstTimeElapsed.getSeconds();
-		testLogger.logp(testLogLevel, 
-						className, 
-						"main", 
-						String.format("First set of tests successfully completed in %1$d.%2$d seconds.", firstSeconds, firstMillis));
-		
-		Logger.getGlobal().info("Testing completed!");
-		logger.exiting("xyz.wrabzy.Grep", "main");
+		// Testing regex()	
+		assert regex(testString.stream(), "^.+RED.+$"                 ).count() == 1 : "1 - Regex.";
+		assert regex(testString.stream(), "^[TF].+$"                  ).count() == 4 : "2 - Regex.";
+		assert regex(testString.stream(), "^\\w+ d"                   ).count() == 2 : "3 - Regex.";
+		assert regex(testString.stream(), "^(?:(?:T.+)|(?:\\w+e .+$))").count() == 4 : "4 - Regex.";
 	}
 }
