@@ -1,35 +1,45 @@
 # 5755
 Simple Tasks - Serious Solutions
 
-В этом репозитории размещены простые задачи, найденные на просторах интернета,
-и их решения на разных языках программирования.
-Актуальный список языков: Java, Kotlin, Haskell.
+This repository contains solutions to simple tasks found on the Internet in different programming languages.
+Current list of languages: Java, Kotlin, Haskell.
 
-Создание этого репозитория охватывает две идеи:
-1) Освоение средств и приемов, предоставляемых языком программирования
-2) Накопление примеров самописного программного кода  
+The creation of this repository covers two ideas:
+1) Mastering the tools and techniques provided by the programming language
+2) Accumulation of examples of self-written program code
 
-Воплощение в решениях задач первой идеи может приводить к кажущемуся излишним "распуханию" кода
-из-за стремления опробовать на практике как можно больше возможностей языка.
+Implementation of the first idea in solutions to tasks can lead to seemingly unnecessary "swelling" of the code
+because of the desire to try in practice as many possibilities of the language as possible.
 
-Пожалуйста, если Вы нашли время ознакомиться с предлагаемыми решениями
-и имеете свое видение того, какими эти решения должны быть, - поделитесь своим мнением.
-
-
-Перечень задач:
+Please, if you took the time to familiarize yourself with the proposed solutions
+and you have your own vision of what these solutions should be - share your opinion.
 
 
-task_01
+List of tasks:
 
-Источник: habr.com
-Автор: DbLogs
-Задание: Аналог grep
-Необходимо реализовать консольную программу, 
-которая бы фильтровала поток текстовой информации подаваемой на вход
-и на выходе показывала лишь те строчки, 
-которые содержат слово передаваемое программе на вход в качестве аргумента.
 
-Варианты усложнения:
-1) Программа не должна учитывать регистр
-2) В аргументах может быть передано не одно слово, а несколько
-3) В качестве аргумента может быть задано не конкретное слово, а регулярное выражение
+task_01 [completed, Java]
+
+Source:	habr.com
+Author:	DbLogs
+Task:	Grep analog
+  It is necessary to implement a console program,
+  which would filter the stream of text information supplied to the input
+  and at the exit showed only those lines
+  which contain the word passed to the program as an argument.
+	
+  Complication options:
+  The program must work case insensitive
+  Arguments can contain more than one word, but several
+  As an argument, not a specific word can be given, but a regular expression
+  
+  [RU, source-lang]
+  Необходимо реализовать консольную программу, 
+  которая бы фильтровала поток текстовой информации подаваемой на вход
+  и на выходе показывала лишь те строчки, 
+  которые содержат слово передаваемое программе на вход в качестве аргумента.
+
+  Варианты усложнения:
+  Программа не должна учитывать регистр
+  В аргументах может быть передано не одно слово, а несколько
+  В качестве аргумента может быть задано не конкретное слово, а регулярное выражение

@@ -111,6 +111,7 @@ public class Grep {
       
       filteringByRegexTest01();
       filteringByRegexTest02();
+      
       Logger.getGlobal().info("Selftesting completed successfully.\n");
     }
 	}
